@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace TheGarbageCollector {
 
-    // Do not use this in mods other then ExpandTheGungeon to prevent conflicting GC setups!
+    // Do not use this in mods other then TheGarbageCollector to prevent conflicting GC setups!
     // If you do you must find a way to detect if GC is disabled by another mod!
     
     public class GC_Manager : MonoBehaviour {
