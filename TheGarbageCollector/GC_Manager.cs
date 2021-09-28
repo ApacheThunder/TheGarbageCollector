@@ -81,7 +81,7 @@ namespace TheGarbageCollector {
             IntPtr expected_func_ptr_mono_gc_collect = GetProcAddress(mono_module, "mono_gc_collect");
             if (func_ptr_mono_gc_collect != expected_func_ptr_mono_gc_collect) {
                 //if you see this error, you need to update the "offset_mono_gc_" variables defined near the top of this class.
-                ETGModConsole.Log("[ExpandTheGungeon] Cannot load GarbageCollector functions. Expected mono's collect at " + func_ptr_mono_gc_collect.ToInt64() + " Actual at " + func_ptr_mono_gc_collect.ToInt64() + " Module root " + mono_module.ToInt64(), true);
+                ETGModConsole.Log("[TheGarbageCollector] Cannot load GarbageCollector functions. Expected mono's collect at " + func_ptr_mono_gc_collect.ToInt64() + " Actual at " + func_ptr_mono_gc_collect.ToInt64() + " Module root " + mono_module.ToInt64(), true);
                 return false;
             }
 
@@ -211,7 +211,6 @@ namespace TheGarbageCollector {
             
             if (DoManualCollection | (allocated_mb >= allocated_mb_limit)) {
                 manual_gc();
-                if (TheGarbageCollector.enableSoundFX) { AkSoundEngine.PostEvent("Play_EX_TrashMan_01", gameObject); }
                 DoManualCollection = false;
             }
             if (TheGarbageCollector.debugMode) {

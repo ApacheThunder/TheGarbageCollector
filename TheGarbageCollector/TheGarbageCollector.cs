@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Reflection;
-using MonoMod.RuntimeDetour;
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 
 namespace TheGarbageCollector { 
@@ -11,15 +7,19 @@ namespace TheGarbageCollector {
                 
         public static bool debugMode = false;
         public static bool DisableGC = false;
-
-        public static readonly bool enableSoundFX = false;
-
+        
         public static readonly string ConsoleCommandName = "garbagecollector";
         public static readonly string GarbageCollectorToggleName = "GarbageCollectorToggle";
         public static readonly string GarbageCollectorDebugModeName = "GarbageCollectorDebugModeName";
 
 
-        public override void Init() { }
+        public static string ZipFilePath;
+        public static string FilePath;
+        
+        public override void Init() {
+            ZipFilePath = Metadata.Archive;
+            FilePath = Metadata.Directory;
+        }
         
         public override void Start() {
             ETGModConsole.Commands.AddGroup(ConsoleCommandName, ConsoleInfo);
@@ -39,6 +39,8 @@ namespace TheGarbageCollector {
                 }
             }
             if (GameManager.Instance) { GameManager.Instance.OnNewLevelFullyLoaded += OnLevelFullyLoaded; }
+
+            AudioLoader.InitAudio();
         }
         
         public void OnLevelFullyLoaded() { if (DisableGC && GC_Manager.d_gc_disabled) { GC_Manager.DoCollect(); } }
@@ -88,7 +90,8 @@ namespace TheGarbageCollector {
                 if (GC_Manager.load_mono_gc()) {
                     GC_Manager.Instance.ToggleHookAndGC(true);
                     if (SystemInfo.systemMemorySize < 8196) { ETGModConsole.Log("[TheGarbageCollector] Warning: Your computer was detected as having 8GB or less ram. It is recommended only to use this feature on machines with more then 8GB of ram!"); }
-                    ETGModConsole.Log("[ExpandTheGungeon] Automatic GC disabled.\nNow will only do collections during floor loads and if player is AFK or been in pause menu for more then 30 seconds!");
+                    ETGModConsole.Log("[TheGarbageCollector] Automatic GC disabled.\nNow will only do collections during floor loads and if player is AFK or been in pause menu for more then 30 seconds!");
+                    AkSoundEngine.PostEvent("Play_TrashMan_01", ETGModMainBehaviour.Instance.gameObject);
                 }
                 PlayerPrefs.SetInt(GarbageCollectorToggleName, 1);
                 PlayerPrefs.Save();
