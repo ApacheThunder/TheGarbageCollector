@@ -9,6 +9,9 @@
 *.userosscache
 *.sln.docstates
 
+# Dependencies end user must provide
+Dependencies/*
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
@@ -23,6 +26,7 @@ bld/
 [Bb]in/
 [Oo]bj/
 [Ll]og/
+
 
 # Visual Studio 2015 cache/options directory
 .vs/
@@ -300,3 +304,4 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+*.dll
