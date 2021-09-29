@@ -6,12 +6,12 @@ using System.Runtime.InteropServices;
 
 namespace TheGarbageCollector {
 
-	public class AudioLoader : TheGarbageCollector {
+	public class AudioLoader {
         
         public static void InitAudio() {
             int FilesLoaded = 0;
-            if (File.Exists(ZipFilePath)) {
-                using (ZipFile ModZIP = ZipFile.Read(ZipFilePath)) {
+            if (File.Exists(TheGarbageCollector.ZipFilePath)) {
+                using (ZipFile ModZIP = ZipFile.Read(TheGarbageCollector.ZipFilePath)) {
                     if (ModZIP != null && ModZIP.Entries.Count > 0) {
                         foreach (ZipEntry entry in ModZIP.Entries) {
                             if (entry.FileName.EndsWith(".bnk")) {
@@ -28,7 +28,7 @@ namespace TheGarbageCollector {
                 }
             }
             // Zip file wasn't found. Try to load from Mod folder instead.
-            AutoloadFromPath(FilePath, "TheGarbageCollector");
+            AutoloadFromPath(TheGarbageCollector.FilePath, "TheGarbageCollector");
         }
 
         public static void AutoloadFromModPath(string path, string prefix) {

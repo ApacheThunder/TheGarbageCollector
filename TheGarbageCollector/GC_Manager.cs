@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace TheGarbageCollector {
 
-    // Do not use this in mods other then TheGarbageCollector to prevent conflicting GC setups!
+    // Do not use this in mods other then ExpandTheGungeon to prevent conflicting GC setups!
     // If you do you must find a way to detect if GC is disabled by another mod!
     
     public class GC_Manager : MonoBehaviour {
@@ -25,7 +25,8 @@ namespace TheGarbageCollector {
         public GC_Manager() {
             turn_off_mono_gc = false;
 
-            manual_gc_factor_threshold = 2;
+            // manual_gc_factor_threshold = 2;
+            manual_gc_factor_threshold = 1;
             manual_gc_min_time_delta_seconds = 10;
 
             expected_time_until_gc = -1;
@@ -47,7 +48,7 @@ namespace TheGarbageCollector {
         }
 
         public static Hook BraveMemoryCollectHook;
-        public static Hook ClearLevelDataHook;
+        public static Hook clearLevelDataHook;
 
         private static FieldInfo LastGcTime = typeof(BraveMemory).GetField("LastGcTime", BindingFlags.Static | BindingFlags.NonPublic);
 
@@ -58,7 +59,8 @@ namespace TheGarbageCollector {
         public static int offset_mono_gc_disable = 0x1b310;
         public static int offset_mono_gc_enable = 0x1b318;
         public static int offset_mono_gc_collect = 0x1b2c4;
-        public static int manual_gc_bytes_threshold_mb = 1024;
+
+        public static int manual_gc_bytes_threshold_mb = 2048;
 
         [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
         public static extern IntPtr GetModuleHandle(string lpModuleName);
@@ -117,29 +119,30 @@ namespace TheGarbageCollector {
 
         public class force_enable_gc_token { public int count; };
         
-        public void ToggleHookAndGC(bool state = true) {
+        public void ToggleHooksAndGC(bool state = true) {
             if (state) {
-                Enable();
+                if (!turn_off_mono_gc) { Enable(); }
                 if (BraveMemoryCollectHook == null) {
                     new Hook(
                         typeof(BraveMemory).GetMethod(nameof(BraveMemory.DoCollect), BindingFlags.Public | BindingFlags.Static),
                         typeof(GC_Manager).GetMethod(nameof(DoCollect), BindingFlags.Public | BindingFlags.Static)
                     );
                 }
-                if (SystemInfo.systemMemorySize > 12000) {
-                    manual_gc_bytes_threshold_mb = 3000;
-                } else if (SystemInfo.systemMemorySize > 6100) {
-                    manual_gc_bytes_threshold_mb = 2176;
-                } else {
-                    manual_gc_bytes_threshold_mb = 1280;
+                if (clearLevelDataHook == null) {
+                    clearLevelDataHook = new Hook(
+                        typeof(GameManager).GetMethod(nameof(GameManager.ClearPerLevelData), BindingFlags.Public | BindingFlags.Instance),
+                        typeof(GC_Manager).GetMethod(nameof(ClearPerLevelDataHook), BindingFlags.Public | BindingFlags.Instance),
+                        typeof(GameManager)
+                    );
                 }
             } else {
+                if (turn_off_mono_gc) { Disable(); }
                 if (BraveMemoryCollectHook != null) { BraveMemoryCollectHook.Dispose(); BraveMemoryCollectHook = null; }
-                Disable();
+                if (clearLevelDataHook != null) { clearLevelDataHook.Dispose(); clearLevelDataHook = null; }
             }
         }
 
-        private void ClearPerLevelData(Action<GameManager> orig, GameManager self) {
+        private void ClearPerLevelDataHook(Action<GameManager> orig, GameManager self) {
             orig(self);
             if (TheGarbageCollector.DisableGC && d_gc_disabled && load_mono_gc()) { Instance.ForceCollect(); }
         }
@@ -165,7 +168,7 @@ namespace TheGarbageCollector {
         }
         
         private void Start() { }
-        protected void FixedUpdate() { monitor_gc(); }
+        // protected void FixedUpdate() { monitor_gc(); }
         protected void Update() { monitor_gc(); }
 
         public void monitor_gc() {
@@ -200,19 +203,22 @@ namespace TheGarbageCollector {
                     }
                 }
             }
-            
+                        
             allocated_mb = ((float)GC.GetTotalMemory(false)) / 1024 / 1024;
             
             float allocated_mb_limit = manual_gc_bytes_threshold_mb;
+
 
             if (manual_gc_most_recent_in_use_bytes != -1) {
                 allocated_mb_limit = Mathf.Max(allocated_mb_limit, ((float)manual_gc_most_recent_in_use_bytes) / 1024 / 1024 * manual_gc_factor_threshold);
             }
             
             if (DoManualCollection | (allocated_mb >= allocated_mb_limit)) {
-                manual_gc();
+                if (!TheGarbageCollector.disableMonitor | DoManualCollection) { manual_gc(); }
                 DoManualCollection = false;
             }
+
+            
             if (TheGarbageCollector.debugMode) {
                 if (last_gc_time != -1) {
                     if ((Time.realtimeSinceStartup - last_gc_time) >= manual_gc_min_time_delta_seconds) {
@@ -286,17 +292,15 @@ namespace TheGarbageCollector {
         }
 
         public void Disable() {
-            if (load_mono_gc() && turn_off_mono_gc) {
-                mono_gc_enable();
-                d_gc_disabled = false;
-            }
+            mono_gc_enable();
+            d_gc_disabled = false;
+            turn_off_mono_gc = false;
         }
 
         public void Enable() {
-            if (load_mono_gc() && !turn_off_mono_gc) {
-                mono_gc_disable();
-                d_gc_disabled = true;
-            }
+            mono_gc_disable();
+            d_gc_disabled = true;
+            turn_off_mono_gc = true;
         }
     }
 }
