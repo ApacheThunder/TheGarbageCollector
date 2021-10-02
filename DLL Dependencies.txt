@@ -5,3 +5,4 @@ MonoMod.RuntimeDetour.dll
 MonoMod.Utils.dll
 UnityEngine.CoreModule.Base.mm.dll
 UnityEngine.CoreModule.dll
+UnityEngine.TextRenderingModule.dll
