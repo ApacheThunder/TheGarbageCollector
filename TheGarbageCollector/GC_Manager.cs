@@ -170,7 +170,7 @@ namespace TheGarbageCollector {
             if (GameManager.Instance.IsPaused) {
                 if (LastUnpausedTime > 0.1f && (Time.realtimeSinceStartup - LastUnpausedTime) > PauseTimeTillManualCollection) {
                     DoManualCollection = true;
-                    // LastUnpausedTime = Time.realtimeSinceStartup;
+                    LastUnpausedTime = Time.realtimeSinceStartup;
                 }
             } else {
                 DoManualCollection = false;

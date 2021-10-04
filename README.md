@@ -1,4 +1,4 @@
-TheGarbageCollector v1.3
+TheGarbageCollector v1.4
 
 Got lots of mods? Got lots of random hitches/frame drops happening at inoppertune times? Also have lots of ram in your PC you don't know what to do with?
 

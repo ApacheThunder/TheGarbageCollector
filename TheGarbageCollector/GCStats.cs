@@ -60,7 +60,7 @@ namespace TheGarbageCollector {
             m_NewLabel.Opacity = 0.5f;
             m_NewLabel.Color = Color.white;
             m_NewLabel.DisabledColor = new Color32(128, 128, 128, 255);
-            m_NewLabel.Size = new Vector2(295, 120);
+            m_NewLabel.Size = new Vector2(350, 120);
             m_NewLabel.MinimumSize = m_NewLabel.Size;
             m_NewLabel.MaximumSize = new Vector2(400, 240);
             m_NewLabel.ClipChildren = false;
@@ -144,7 +144,9 @@ namespace TheGarbageCollector {
                 stringBuilder.AppendFormat("Current Allocation: {0:0} MB / {1:0} MB\n", GC_Manager.GetTotalMemoryAllocatedInMB, AllocationLimit);
                 stringBuilder.AppendFormat("Current Heap Size: {0:0} MB\n", (ProfileUtils.GetMonoHeapSize() / 1024 / 1024));
                 stringBuilder.AppendFormat("Time Since Last In Combat: {0: 00} sec\n", (Time.realtimeSinceStartup - GC_Manager.Instance.LastInCombatTime));
-                stringBuilder.AppendFormat("Time Spent In Pause Screen: {0: 00} sec\n", (Time.realtimeSinceStartup - GC_Manager.Instance.LastUnpausedTime));
+                if ((Time.realtimeSinceStartup - GC_Manager.Instance.LastUnpausedTime) > 0.1f) {
+                    stringBuilder.AppendFormat("Time Spent In Pause Screen: {0: 00} sec\n", (Time.realtimeSinceStartup - GC_Manager.Instance.LastUnpausedTime));
+                }
                 stringBuilder.AppendFormat("Time Since Last Collection: {0: 00} sec\n", (Time.realtimeSinceStartup - GC_Manager.Instance.LastCollectionTime));
                 stringBuilder.AppendFormat("Total Collections: {0}\n", ProfileUtils.GetMonoCollectionCount());
                 if (WaitingForCollection) {
