@@ -1,9 +1,7 @@
 ﻿using Dungeonator;
 using System;
-using System.Collections;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Text;
 using UnityEngine;
 
 namespace TheGarbageCollector {

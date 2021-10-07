@@ -1,6 +1,4 @@
-﻿using MonoMod.RuntimeDetour;
-using System.Reflection;
-using System.Text;
+﻿using System.Text;
 using UnityEngine;
 
 namespace TheGarbageCollector {
@@ -19,7 +17,7 @@ namespace TheGarbageCollector {
         
         public GCStats() {
             ShowGcData = false;
-            UIPosition = new Vector3(-710f, 140, 0);
+            UIPosition = new Vector3(-710f, 130, 0);
 
             RedColor = new Color32(190, 160, 0, 255);
             WhiteColor = new Color32(255, 255, 255, 255);
