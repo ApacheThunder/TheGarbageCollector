@@ -3,28 +3,33 @@ using System.Collections.Generic;
 using System;
 using MonoMod.RuntimeDetour;
 using System.Reflection;
+using BepInEx;
 
-namespace TheGarbageCollector { 
+namespace TheGarbageCollector {
 
-    public class TheGarbageCollector : ETGModule {
+    [BepInDependency("etgmodding.etg.mtgapi")]
+    [BepInPlugin(GUID, ModName, VERSION)]
+    public class TheGarbageCollector : BaseUnityPlugin {
 
         public static bool DisableGC = true;
         public static bool disableMonitor = false;
-        
+
+        public const string GUID = "ApacheThunder.etg.TheGarbageCollector";
+        public const string ModName = "TheGarbageCollector";
+        public const string VERSION = "1.4.2";
+
         public static readonly string ConsoleCommandName = "garbagecollector";
         public static readonly string GarbageCollectorToggleName = "TheGarbageCollectorDisabled";
         public static readonly string GarbageCollectorMemoryCap = "TheGarbageCollectorMemCap";
         public static readonly string ModNameInRed = "<color=#00FF00>[TheGarbageCollector]</color> ";
-
-        public static string ZipFilePath;
-        public static string FilePath;
+                
+        public static string FolderPath;
 
         public static Hook BraveMemoryCollectHook;
         public static Hook clearLevelDataHook;
         public static Hook gameManagerHook;
 
         public static GameObject GCManagerObject;
-        // public static GameObject GCStatsObject;
 
         private static int GetBestMemoryCap {
             get {
@@ -39,24 +44,17 @@ namespace TheGarbageCollector {
                 }
             }
         }
+        
+        public void Start() { ETGModMainBehaviour.WaitForGameManagerStart(GMStart); }
+        
+        public void GMStart(GameManager gameManager) {
+            FolderPath = this.FolderPath();
 
-        private void GameManager_Awake(Action<GameManager> orig, GameManager self) {
-            orig(self);
-            self.OnNewLevelFullyLoaded += OnLevelFullyLoaded;
-        }
-        
-        public override void Init() {
-            ZipFilePath = Metadata.Archive;
-            FilePath = Metadata.Directory;
-        }
-        
-        public override void Start() {
             ETGModConsole.Commands.AddGroup(ConsoleCommandName, ConsoleInfo);
             ETGModConsole.Commands.GetGroup(ConsoleCommandName).AddUnit("toggle", ToggleGCSetting);
             ETGModConsole.Commands.GetGroup(ConsoleCommandName).AddUnit("collect", DoACollect);
             ETGModConsole.Commands.GetGroup(ConsoleCommandName).AddUnit("stats", ToggleGCStats);
             ETGModConsole.Commands.GetGroup(ConsoleCommandName).AddUnit("setmemcap", SetMemoryCap);
-            AudioLoader.InitAudio();
             
             int ManualMemoryCap = PlayerPrefs.GetInt(GarbageCollectorMemoryCap);
 
@@ -80,7 +78,12 @@ namespace TheGarbageCollector {
                 ETGModConsole.Log(ModNameInRed + "Unity's Garbage Collector currently active. Use command garbagecolletor toggle to enable TheGarbageCollector and disable Unity's GarbageCollector.");
             }
         }
-                
+
+
+        private void GameManager_Awake(Action<GameManager> orig, GameManager self) {
+            orig(self);
+            self.OnNewLevelFullyLoaded += OnLevelFullyLoaded;
+        }
 
         public static void OnLevelFullyLoaded() {
             if (DisableGC && GC_Manager.Instance && GC_Manager.d_gc_disabled) {
@@ -141,7 +144,6 @@ namespace TheGarbageCollector {
                     ToggleHooksAndGC(DisableGC);
                     if (SystemInfo.systemMemorySize < 8196) { ETGModConsole.Log("[TheGarbageCollector] Warning: Your computer was detected as having 8GB or less ram. It is recommended only to use this feature on machines with more then 8GB of ram!"); }
                     ETGModConsole.Log("[TheGarbageCollector] Automatic GC disabled.\nNow will only do collections during floor loads and if player is AFK or been in pause menu for more then 30 seconds!");
-                    AkSoundEngine.PostEvent("Play_TrashMan_01", ETGModMainBehaviour.Instance.gameObject);
                 }
                 PlayerPrefs.SetInt(GarbageCollectorToggleName, 0);
             } else {
@@ -235,9 +237,6 @@ namespace TheGarbageCollector {
                 GC.Collect();
             }
         }
-
-
-        public override void Exit() { }
     }
 }
 

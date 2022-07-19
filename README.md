@@ -1,4 +1,4 @@
-TheGarbageCollector v1.4
+TheGarbageCollector
 
 Got lots of mods? Got lots of random hitches/frame drops happening at inoppertune times? Also have lots of ram in your PC you don't know what to do with?
 
@@ -21,3 +21,4 @@ Oh and definitely don't use this with the 32bit version of the game....For obvio
 
 
 Credit to https://forum.unity.com/threads/how-to-disable-the-garbage-collector-on-windows.369015/ where I discovered how to do this for Enter the Gungeon.
+Credit To SpecialAPI for help with making BepInEx MTG possible and for help porting mods to it.
