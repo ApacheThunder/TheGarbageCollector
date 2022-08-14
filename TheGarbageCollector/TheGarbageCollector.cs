@@ -16,7 +16,7 @@ namespace TheGarbageCollector {
 
         public const string GUID = "ApacheThunder.etg.TheGarbageCollector";
         public const string ModName = "TheGarbageCollector";
-        public const string VERSION = "1.4.2";
+        public const string VERSION = "1.4.3";
 
         public static readonly string ConsoleCommandName = "garbagecollector";
         public static readonly string GarbageCollectorToggleName = "TheGarbageCollectorDisabled";
@@ -30,8 +30,9 @@ namespace TheGarbageCollector {
         public static Hook gameManagerHook;
 
         public static GameObject GCManagerObject;
+        public static GameObject GCFoyerCheckerOBJ;
 
-        private static int GetBestMemoryCap {
+        public static int GetBestMemoryCap {
             get {
                 if (SystemInfo.systemMemorySize > 24576) {
                     return 8196;
@@ -55,30 +56,17 @@ namespace TheGarbageCollector {
             ETGModConsole.Commands.GetGroup(ConsoleCommandName).AddUnit("collect", DoACollect);
             ETGModConsole.Commands.GetGroup(ConsoleCommandName).AddUnit("stats", ToggleGCStats);
             ETGModConsole.Commands.GetGroup(ConsoleCommandName).AddUnit("setmemcap", SetMemoryCap);
-            
-            int ManualMemoryCap = PlayerPrefs.GetInt(GarbageCollectorMemoryCap);
 
-            if (ManualMemoryCap >= 1024) {
-                GC_Manager.MemoryGrowthAllowence = ManualMemoryCap;
-                if (ManualMemoryCap >= 8196) { disableMonitor = true; }
-            } else {
-                GC_Manager.MemoryGrowthAllowence = GetBestMemoryCap;
-                // If user has obcene amount of ram, there is no need to do colletions during gameplay unless player is AFK/has game paused and when a floor is loading.
-                if (SystemInfo.systemMemorySize > 24576) { disableMonitor = true; }
-            }
-
-            if (PlayerPrefs.GetInt(GarbageCollectorToggleName) == 1) { DisableGC = false; return; }
-            if (DisableGC) {
-                ETGModConsole.Log(ModNameInRed + "Unity's Garbage Collector is now disabled. Use command garbagecolletor toggle to run it back on.");
-                if (GC_Manager.load_mono_gc()) {
-                    ToggleHooksAndGC(true);
-                    if (SystemInfo.systemMemorySize < 8196) { ETGModConsole.Log(ModNameInRed + "Warning: Your computer was detected as having 8GB or less ram. It is recommended only to disable GarbageColletor on machines with more then 8GB of ram!", true); }
-                }
-            } else {
-                ETGModConsole.Log(ModNameInRed + "Unity's Garbage Collector currently active. Use command garbagecolletor toggle to enable TheGarbageCollector and disable Unity's GarbageCollector.");
-            }
+            CreateFoyerController();
         }
 
+        public static void CreateFoyerController() {
+            if (!GCFoyerCheckerOBJ) {
+                GCFoyerCheckerOBJ = new GameObject("TheGarbageCollector Foyer Checker", new Type[] { typeof(GCFoyer) });
+            } else {
+                return;
+            }
+        }
 
         private void GameManager_Awake(Action<GameManager> orig, GameManager self) {
             orig(self);

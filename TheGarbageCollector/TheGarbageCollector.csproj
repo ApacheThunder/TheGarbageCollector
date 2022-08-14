@@ -75,6 +75,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GCFoyer.cs" />
     <Compile Include="GCStats.cs" />
     <Compile Include="GC_Manager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
