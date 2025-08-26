@@ -16,13 +16,15 @@ namespace TheGarbageCollector {
 
         public const string GUID = "ApacheThunder.etg.TheGarbageCollector";
         public const string ModName = "TheGarbageCollector";
-        public const string VERSION = "1.4.3";
+        public const string VERSION = "1.4.4";
 
         public static readonly string ConsoleCommandName = "garbagecollector";
         public static readonly string GarbageCollectorToggleName = "TheGarbageCollectorDisabled";
         public static readonly string GarbageCollectorMemoryCap = "TheGarbageCollectorMemCap";
         public static readonly string ModNameInRed = "<color=#00FF00>[TheGarbageCollector]</color> ";
-                
+
+        public static readonly string ModSoundEventName = "Play_TrashMan_01";
+
         public static string FolderPath;
 
         public static Hook BraveMemoryCollectHook;
@@ -50,7 +52,14 @@ namespace TheGarbageCollector {
         
         public void GMStart(GameManager gameManager) {
             FolderPath = this.FolderPath();
-
+            
+            if (Application.platform != RuntimePlatform.WindowsPlayer) {
+                ETGModConsole.Log(ModNameInRed + "ERROR: Linux/MacOS/Other version of the game detected!. This mod only supports the Windows version of ETG!");
+                return;
+            }
+                        
+            if (!AudioResourceLoader.InitAudio()) ETGModConsole.Log(ModNameInRed + "WARNING: Failed to load custom sound bank!");
+            
             ETGModConsole.Commands.AddGroup(ConsoleCommandName, ConsoleInfo);
             ETGModConsole.Commands.GetGroup(ConsoleCommandName).AddUnit("toggle", ToggleGCSetting);
             ETGModConsole.Commands.GetGroup(ConsoleCommandName).AddUnit("collect", DoACollect);
@@ -62,7 +71,7 @@ namespace TheGarbageCollector {
 
         public static void CreateFoyerController() {
             if (!GCFoyerCheckerOBJ) {
-                GCFoyerCheckerOBJ = new GameObject("TheGarbageCollector Foyer Checker", new Type[] { typeof(GCFoyer) });
+                GCFoyerCheckerOBJ = new GameObject((ModName + " Foyer Checker"), new Type[] { typeof(GCFoyer) });
             } else {
                 return;
             }
@@ -126,18 +135,23 @@ namespace TheGarbageCollector {
         }
 
         private void ToggleGCSetting(string[] consoleText) {
+            if (!Foyer.Instance | Foyer.DoIntroSequence | Foyer.DoMainMenu) {
+                ETGModConsole.Log("[" + ModName + "]" + " Warning: Please wait until the foyer is loaded before trying to enable/disable the mod!");
+                return;
+            }
             if (!DisableGC) {
                 DisableGC = true;
                 if (GC_Manager.load_mono_gc()) {
+                    AkSoundEngine.PostEvent(ModSoundEventName, ETGModMainBehaviour.Instance.gameObject);
                     ToggleHooksAndGC(DisableGC);
-                    if (SystemInfo.systemMemorySize < 8196) { ETGModConsole.Log("[TheGarbageCollector] Warning: Your computer was detected as having 8GB or less ram. It is recommended only to use this feature on machines with more then 8GB of ram!"); }
-                    ETGModConsole.Log("[TheGarbageCollector] Automatic GC disabled.\nNow will only do collections during floor loads and if player is AFK or been in pause menu for more then 30 seconds!");
+                    if (SystemInfo.systemMemorySize < 8196) { ETGModConsole.Log("[" + ModName + "]" + " Warning: Your computer was detected as having 8GB or less ram. It is recommended only to use this feature on machines with more then 8GB of ram!"); }
+                    ETGModConsole.Log("[" + ModName + "] " + ModName + " mod is now enabled.\nNow will only do collections during floor loads and if player is AFK or been in pause menu for more then 30 seconds!");
                 }
                 PlayerPrefs.SetInt(GarbageCollectorToggleName, 0);
             } else {
                 DisableGC = false;
                 ToggleHooksAndGC(DisableGC);
-                ETGModConsole.Log("[TheGarbageCollector] Automatic GC enabled.\nUnity's GC will now run normally!");
+                ETGModConsole.Log("[" + ModName + "] " + ModName + " mod is now disabled.\nUnity's GC will now run normally!");
                 PlayerPrefs.SetInt(GarbageCollectorToggleName, 1);
             }
             PlayerPrefs.Save();
@@ -154,11 +168,11 @@ namespace TheGarbageCollector {
         }
 
         private void DoACollect(string[] consoleText) {
-            ETGModConsole.Log("[TheGarbageCollector] Doing a Collection");
+            ETGModConsole.Log(ModName + " Doing a Collection");
             if (GameManager.Instance && GameManager.Instance.PrimaryPlayer) {
-                AkSoundEngine.PostEvent("Play_TrashMan_01", GameManager.Instance.PrimaryPlayer.gameObject);
+                AkSoundEngine.PostEvent(ModSoundEventName, GameManager.Instance.PrimaryPlayer.gameObject);
             } else {
-                AkSoundEngine.PostEvent("Play_TrashMan_01", ETGModMainBehaviour.Instance.gameObject);
+                AkSoundEngine.PostEvent(ModSoundEventName, ETGModMainBehaviour.Instance.gameObject);
             }
             if (DisableGC) { GC_Manager.Instance.DoCollect(); } else { BraveMemory.DoCollect(); }
         }
@@ -216,7 +230,7 @@ namespace TheGarbageCollector {
             if (DisableGC && GC_Manager.d_gc_disabled && GC_Manager.load_mono_gc()) { GC_Manager.Instance.DoCollect(); }
         }
 
-        public static void DoCollect() {
+        public static void DoCollect() {            
             if (GC_Manager.d_gc_disabled && !GameManager.Instance.IsLoadingLevel) { return; }
             if (GC_Manager.d_gc_disabled) {
                 GC_Manager.Instance.DoCollect();

@@ -15,7 +15,7 @@ namespace TheGarbageCollector {
             get {
                 if (!TheGarbageCollector.GCManagerObject?.GetComponent<GC_Manager>()) {
                     if (!TheGarbageCollector.GCManagerObject) {
-                        TheGarbageCollector.GCManagerObject = new GameObject("TheGarbageCollector");
+                        TheGarbageCollector.GCManagerObject = new GameObject(TheGarbageCollector.ModName);
                         DontDestroyOnLoad(TheGarbageCollector.GCManagerObject);
                     }
                 }
@@ -131,7 +131,7 @@ namespace TheGarbageCollector {
         
         private void Collect() {
             if (GCStats.Instance.ShowGcData && !Dungeon.IsGenerating && (GameManager.Instance && !GameManager.Instance.IsLoadingLevel)) {
-                AkSoundEngine.PostEvent("Play_TrashMan_01", ETGModMainBehaviour.Instance.gameObject);
+                if (ETGModMainBehaviour.Instance.gameObject) AkSoundEngine.PostEvent(TheGarbageCollector.ModSoundEventName, ETGModMainBehaviour.Instance.gameObject);
             }
                         
             int collection_count = ProfileUtils.GetMonoCollectionCount();
@@ -152,7 +152,7 @@ namespace TheGarbageCollector {
 
             if (GCStats.Instance.ShowGcData && !Dungeon.IsGenerating && (GameManager.Instance && !GameManager.Instance.IsLoadingLevel)) {
                 if (GCStats.Instance.stringBuilder != null) {
-                    Debug.Log("[TheGarbageCollector] Collection ran. Last GC Stats:");
+                    Debug.Log(TheGarbageCollector.ModName + " Collection ran. Last GC Stats:");
                     Debug.Log(GCStats.Instance.stringBuilder);
                 }
             }

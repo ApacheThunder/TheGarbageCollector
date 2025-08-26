@@ -32,13 +32,13 @@ namespace TheGarbageCollector {
 
                     if (PlayerPrefs.GetInt(TheGarbageCollector.GarbageCollectorToggleName) == 1) { TheGarbageCollector.DisableGC = false; return; }
                     if (TheGarbageCollector.DisableGC) {
-                        ETGModConsole.Log(TheGarbageCollector.ModNameInRed + "Unity's Garbage Collector is now disabled. Use command garbagecolletor toggle to run it back on.");
+                        ETGModConsole.Log(TheGarbageCollector.ModNameInRed + TheGarbageCollector.ModName + " is currently enabled. Use command 'garbagecolletor toggle' disable the mod.");
                         if (GC_Manager.load_mono_gc()) {
                             TheGarbageCollector.ToggleHooksAndGC(true);
-                            if (SystemInfo.systemMemorySize < 8196) { ETGModConsole.Log(TheGarbageCollector.ModNameInRed + "Warning: Your computer was detected as having 8GB or less ram. It is recommended only to disable GarbageColletor on machines with more then 8GB of ram!", true); }
+                            if (SystemInfo.systemMemorySize < 8196) { ETGModConsole.Log(TheGarbageCollector.ModNameInRed + "Warning: Your computer was detected as having 8GB or less ram. It is recommended only to enable this mod on machines with more then 8GB of ram!", true); }
                         }
                     } else {
-                        ETGModConsole.Log(TheGarbageCollector.ModNameInRed + "Unity's Garbage Collector currently active. Use command garbagecolletor toggle to enable TheGarbageCollector and disable Unity's GarbageCollector.");
+                        ETGModConsole.Log(TheGarbageCollector.ModNameInRed + TheGarbageCollector.ModName + " is currently disabled. Use command 'garbagecolletor toggle' to enable " + TheGarbageCollector.ModName + " and disable Unity's GarbageCollector.");
                     }
                     m_State = State.Exit;
                     return;

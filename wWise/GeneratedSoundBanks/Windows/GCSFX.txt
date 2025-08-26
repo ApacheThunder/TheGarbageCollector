@@ -13,5 +13,5 @@ Game Parameter	ID	Name			Wwise Object Path	Notes
 	3273357900	VOL_SFX			\Default Work Unit\VOL_SFX	
 
 In Memory Audio	ID	Name	Audio source file		Wwise Object Path	Notes	Data Size
-	666310335	DeVito_TrashMan	C:\Users\Spenser\Desktop\wWise\TheGarbageCollector\.cache\Windows\SFX\EX_DeVito_TrashMan_255C9D35.wem		\Actor-Mixer Hierarchy\Default Work Unit\DeVito_TrashMan		286174
+	666310335	DeVito_TrashMan	C:\Users\Spenser\Documents\GitHub\ApacheThunder\TheGarbageCollector\wWise\.cache\Windows\SFX\EX_DeVito_TrashMan_255C9D35.wem		\Actor-Mixer Hierarchy\Default Work Unit\DeVito_TrashMan		286174
 
