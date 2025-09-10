@@ -8,14 +8,12 @@ namespace TheGarbageCollector {
 
         private enum State { PreFoyerCheck, EnableMod, Exit };
         private State m_State;
-
-        public void Awake() { }
-        public void Start() { }
-
+        
         public void Update() {
             switch (m_State) {
                 case State.PreFoyerCheck:
-                    if (Foyer.DoIntroSequence && Foyer.DoMainMenu) { return; }
+                    if (Foyer.DoIntroSequence && Foyer.DoMainMenu)return;
+                    TheGarbageCollector.AllowModEnable = true;
                     m_State = State.EnableMod;
                     return;
                 case State.EnableMod:
@@ -32,13 +30,13 @@ namespace TheGarbageCollector {
 
                     if (PlayerPrefs.GetInt(TheGarbageCollector.GarbageCollectorToggleName) == 1) { TheGarbageCollector.DisableGC = false; return; }
                     if (TheGarbageCollector.DisableGC) {
-                        ETGModConsole.Log(TheGarbageCollector.ModNameInRed + TheGarbageCollector.ModName + " is currently enabled. Use command 'garbagecolletor toggle' disable the mod.");
+                        ETGModConsole.Log(TheGarbageCollector.ModNameGreen + TheGarbageCollector.ModName + " is currently enabled. Use command 'garbagecolletor toggle' disable the mod.");
                         if (GC_Manager.load_mono_gc()) {
                             TheGarbageCollector.ToggleHooksAndGC(true);
-                            if (SystemInfo.systemMemorySize < 8196) { ETGModConsole.Log(TheGarbageCollector.ModNameInRed + "Warning: Your computer was detected as having 8GB or less ram. It is recommended only to enable this mod on machines with more then 8GB of ram!", true); }
+                            if (SystemInfo.systemMemorySize < 8196) { ETGModConsole.Log(TheGarbageCollector.ModNameGreen + "Warning: Your computer was detected as having 8GB or less ram. It is recommended only to enable this mod on machines with more then 8GB of ram!", true); }
                         }
                     } else {
-                        ETGModConsole.Log(TheGarbageCollector.ModNameInRed + TheGarbageCollector.ModName + " is currently disabled. Use command 'garbagecolletor toggle' to enable " + TheGarbageCollector.ModName + " and disable Unity's GarbageCollector.");
+                        ETGModConsole.Log(TheGarbageCollector.ModNameGreen + TheGarbageCollector.ModName + " is currently disabled. Use command 'garbagecolletor toggle' to enable " + TheGarbageCollector.ModName + " and disable Unity's GarbageCollector.");
                     }
                     m_State = State.Exit;
                     return;

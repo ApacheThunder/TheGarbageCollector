@@ -13,15 +13,18 @@ namespace TheGarbageCollector {
 
         public static bool DisableGC = true;
         public static bool disableMonitor = false;
+        public static bool AllowModEnable = false;
 
         public const string GUID = "ApacheThunder.etg.TheGarbageCollector";
         public const string ModName = "TheGarbageCollector";
-        public const string VERSION = "1.4.4";
+        public const string VERSION = "1.4.5";
 
         public static readonly string ConsoleCommandName = "garbagecollector";
         public static readonly string GarbageCollectorToggleName = "TheGarbageCollectorDisabled";
         public static readonly string GarbageCollectorMemoryCap = "TheGarbageCollectorMemCap";
-        public static readonly string ModNameInRed = "<color=#00FF00>[TheGarbageCollector]</color> ";
+        public static readonly string ModNameGreen = "<color=#00FF00>[TheGarbageCollector]</color> ";
+        public static readonly string ModNameRed = "<color=#FF0000>[TheGarbageCollector]</color> ";
+
 
         public static readonly string ModSoundEventName = "Play_TrashMan_01";
 
@@ -54,11 +57,11 @@ namespace TheGarbageCollector {
             FolderPath = this.FolderPath();
             
             if (Application.platform != RuntimePlatform.WindowsPlayer) {
-                ETGModConsole.Log(ModNameInRed + "ERROR: Linux/MacOS/Other version of the game detected!. This mod only supports the Windows version of ETG!");
+                ETGModConsole.Log(ModNameRed + "ERROR: Linux/MacOS/Other version of the game detected!. This mod only supports the Windows version of ETG!");
                 return;
             }
                         
-            if (!AudioResourceLoader.InitAudio()) ETGModConsole.Log(ModNameInRed + "WARNING: Failed to load custom sound bank!");
+            if (!AudioResourceLoader.InitAudio()) ETGModConsole.Log(ModNameRed + "WARNING: Failed to load custom sound bank!");
             
             ETGModConsole.Commands.AddGroup(ConsoleCommandName, ConsoleInfo);
             ETGModConsole.Commands.GetGroup(ConsoleCommandName).AddUnit("toggle", ToggleGCSetting);
@@ -104,11 +107,11 @@ namespace TheGarbageCollector {
                 if (m_CommandList.Count <=0) { return; }
 
                 if (!m_IsCommandValid(consoleText, string.Empty, string.Empty)) {
-                    ETGModConsole.Log("[TheGarbageCollector] No sub command specified! The following console commands are available for TheGarbageCollector:\n", false);
+                    ETGModConsole.Log(ModNameRed + "No sub command specified! The following console commands are available for TheGarbageCollector:\n", false);
                     foreach (string Command in m_CommandList) { ETGModConsole.Log("    " + Command + "\n", false); }
                     return;
                 } else if (!m_CommandList.Contains(consoleText[0].ToLower())) {
-                    ETGModConsole.Log("[TheGarbageCollector] Invalid sub-command! The following console commands are available for TheGarbageCollector:\n", false);
+                    ETGModConsole.Log(ModNameRed + "Invalid sub-command! The following console commands are available for TheGarbageCollector:\n", false);
                     foreach (string Command in m_CommandList) { ETGModConsole.Log("    " + Command + "\n", false); }
                     return;
                 }
@@ -119,24 +122,24 @@ namespace TheGarbageCollector {
 
         private bool m_IsCommandValid(string[] CommandText, string validCommands, string sourceSubCommand) {
             if (CommandText == null) {
-                if (!string.IsNullOrEmpty(validCommands) && !string.IsNullOrEmpty(sourceSubCommand)) { ETGModConsole.Log("[TheGarbageCollector] [" + sourceSubCommand + "] ERROR: Invalid console command specified! Valid Sub-Commands: \n" + validCommands); }
+                if (!string.IsNullOrEmpty(validCommands) && !string.IsNullOrEmpty(sourceSubCommand)) { ETGModConsole.Log(ModNameRed + "[" + sourceSubCommand + "] ERROR: Invalid console command specified! Valid Sub-Commands: \n" + validCommands); }
                 return false;
             } else if (CommandText.Length <= 0) {
-                if (!string.IsNullOrEmpty(validCommands) && !string.IsNullOrEmpty(sourceSubCommand)) { ETGModConsole.Log("[TheGarbageCollector] [" + sourceSubCommand + "] No sub-command specified. Valid Sub-Commands: \n" + validCommands); }
+                if (!string.IsNullOrEmpty(validCommands) && !string.IsNullOrEmpty(sourceSubCommand)) { ETGModConsole.Log(ModNameRed + "[" + sourceSubCommand + "] No sub-command specified. Valid Sub-Commands: \n" + validCommands); }
                 return false;
             } else if (string.IsNullOrEmpty(CommandText[0])) {
-                if (!string.IsNullOrEmpty(validCommands) && !string.IsNullOrEmpty(sourceSubCommand)) { ETGModConsole.Log("[TheGarbageCollector] [" + sourceSubCommand + "] No sub-command specified. Valid Sub-Commands: \n" + validCommands); }
+                if (!string.IsNullOrEmpty(validCommands) && !string.IsNullOrEmpty(sourceSubCommand)) { ETGModConsole.Log(ModNameRed + "[" + sourceSubCommand + "] No sub-command specified. Valid Sub-Commands: \n" + validCommands); }
                 return false;
             } else if (CommandText.Length > 1) {
-                if (!string.IsNullOrEmpty(validCommands) && !string.IsNullOrEmpty(sourceSubCommand)) { ETGModConsole.Log("[TheGarbageCollector] [" + sourceSubCommand + "] ERROR: Only one sub-command is accepted!. Valid Commands: \n" + validCommands); }
+                if (!string.IsNullOrEmpty(validCommands) && !string.IsNullOrEmpty(sourceSubCommand)) { ETGModConsole.Log(ModNameRed + "[" + sourceSubCommand + "] ERROR: Only one sub-command is accepted!. Valid Commands: \n" + validCommands); }
                 return false;
             }
             return true;
         }
 
         private void ToggleGCSetting(string[] consoleText) {
-            if (!Foyer.Instance | Foyer.DoIntroSequence | Foyer.DoMainMenu) {
-                ETGModConsole.Log("[" + ModName + "]" + " Warning: Please wait until the foyer is loaded before trying to enable/disable the mod!");
+            if (!AllowModEnable) {
+                ETGModConsole.Log(ModNameRed + "Warning: Please wait until the foyer is loaded before trying to enable/disable the mod!");
                 return;
             }
             if (!DisableGC) {
@@ -144,14 +147,14 @@ namespace TheGarbageCollector {
                 if (GC_Manager.load_mono_gc()) {
                     AkSoundEngine.PostEvent(ModSoundEventName, ETGModMainBehaviour.Instance.gameObject);
                     ToggleHooksAndGC(DisableGC);
-                    if (SystemInfo.systemMemorySize < 8196) { ETGModConsole.Log("[" + ModName + "]" + " Warning: Your computer was detected as having 8GB or less ram. It is recommended only to use this feature on machines with more then 8GB of ram!"); }
-                    ETGModConsole.Log("[" + ModName + "] " + ModName + " mod is now enabled.\nNow will only do collections during floor loads and if player is AFK or been in pause menu for more then 30 seconds!");
+                    if (SystemInfo.systemMemorySize < 8196) { ETGModConsole.Log(ModNameRed + "Warning: Your computer was detected as having 8GB or less ram. It is recommended only to use this feature on machines with more then 8GB of ram!"); }
+                    ETGModConsole.Log(ModNameGreen + ModName + " mod is now enabled.\nNow will only do collections during floor loads and if player is AFK or been in pause menu for more then 30 seconds!");
                 }
                 PlayerPrefs.SetInt(GarbageCollectorToggleName, 0);
             } else {
                 DisableGC = false;
                 ToggleHooksAndGC(DisableGC);
-                ETGModConsole.Log("[" + ModName + "] " + ModName + " mod is now disabled.\nUnity's GC will now run normally!");
+                ETGModConsole.Log(ModNameGreen + ModName + " mod is now disabled.\nUnity's GC will now run normally!");
                 PlayerPrefs.SetInt(GarbageCollectorToggleName, 1);
             }
             PlayerPrefs.Save();
@@ -160,15 +163,15 @@ namespace TheGarbageCollector {
         private void ToggleGCStats(string[] consoleText) {
             if (GCStats.Instance.ShowGcData) {
                 GCStats.Instance.ShowGcData = false;
-                ETGModConsole.Log(ModNameInRed + "GC Stats disabled!");
+                ETGModConsole.Log(ModNameGreen + "GC Stats disabled!");
             } else {
                 GCStats.Instance.ShowGcData = true;
-                ETGModConsole.Log(ModNameInRed + "GC Stats enabled!");
+                ETGModConsole.Log(ModNameGreen + "GC Stats enabled!");
             }
         }
 
         private void DoACollect(string[] consoleText) {
-            ETGModConsole.Log(ModName + " Doing a Collection");
+            ETGModConsole.Log(ModNameGreen + "Doing a Collection");
             if (GameManager.Instance && GameManager.Instance.PrimaryPlayer) {
                 AkSoundEngine.PostEvent(ModSoundEventName, GameManager.Instance.PrimaryPlayer.gameObject);
             } else {
@@ -190,12 +193,12 @@ namespace TheGarbageCollector {
                 PlayerPrefs.SetInt(GarbageCollectorMemoryCap, MemorySize);
                 PlayerPrefs.Save();
                 if (MemoryCapWasReset) {
-                    ETGModConsole.Log(ModNameInRed + "Memory allocation limit manually set. To allow this to be auto set again, set it to a value below 1024!");
+                    ETGModConsole.Log(ModNameGreen + "Memory allocation limit manually set. To allow this to be auto set again, set it to a value below 1024!");
                 } else {
-                    ETGModConsole.Log(ModNameInRed + "Requested memory cap is below minimum allowed value.\nMemory cap is now set to Auto based on your current system memory spec.");
+                    ETGModConsole.Log(ModNameRed + "Requested memory cap is below minimum allowed value.\nMemory cap is now set to Auto based on your current system memory spec.");
                 }
             } else {
-                ETGModConsole.Log(ModNameInRed + "No memory value specified. Please specify a memory limit you want to use!");
+                ETGModConsole.Log(ModNameRed + "No memory value specified. Please specify a memory limit you want to use!");
             }
         }
 
